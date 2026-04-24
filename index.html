@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Trening PWA</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .app {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #exercise {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        #timer {
+            font-size: 80px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+        <div id="exercise">Gotowa?</div>
+        <div id="timer">30</div>
+
+        <button type="button" onclick="startWorkout()">Start/wznów</button>
+        <button type="button" onclick="pauseWorkout()">Pauza</button>
+    </div>
+
+    <script>
+        const warmUp = [
+            "głowa na boki",
+            "krążenia przedramion",
+            "krążenia rąk przód/tył",
+            "dłonie na barki - krążenia przód/tył",
+            "splatamy dłonie - rozgrzewamy nadgarstki",
+            "skrętoskłon - rozgrzewamy kręgosłup",
+            "krążenia bioder",
+            "krążenie kolan do środka i na zewnątrz",
+            "unoszenie nóg - okrążenia stóp",
+            "zakrok, rotacja ramion do góry, powrót, zmiana strony",
+            "ramiona do góry, stop na zewnątrz i do przysiadu zewnętrznego",
+            "trucht",
+            "obciągnięte palce - trucht",
+            "skip C - pięty o pośladki",
+            "pajace",
+            "trucht",
+            "obciągnięte palce - trucht",
+            "skip C - pięty o pośladki",
+            "pajace",
+            "marsz"
+        ];
+
+        const slimLegs = [
+            "1. unieś nogę w kolanie, wypad do tyłu, unieś, wypad do boku na jedną stronę",
+            "2. przeskok na tej samej nodze przód/tył",
+            "3. unieś nogę w kolanie, wypad do tyłu, unieś, wypad do boku na drugą stronę",
+            "4. przeskok na tej samej nodze przód/tył",
+            "5. przeskoki żabka na boki",
+            "6. przeskoki z nogi na nogę boksując",
+            "7. balans biodrami w przysiadzie rozwartym",
+            "8. zeskakiwanie/wskakiwanie na linę",
+            "9. przysiad złączony, przeskok na rozwarty, okrążenie nogą w przysiadzie na przemian",
+            "10. wymachy kolan do rąk po 4 razy na stronę",
+            "11. pozycja przysiad - delikatne podskoki",
+            "12. przeskoki nóg przód/tył - nożyce",
+            "13. przysiad, wymach nogi w bok na jedną stronę",
+            "14. kankan - kolano, potem prosta noga na jedną stronę",
+            "15. przysiad, wymach nogi w bok na drugą stronę",
+            "16. kankan - kolano, potem prosta noga na drugą stronę",
+            "17. pozycja przysiad - pięty w górę",
+            "18. szybkie nogi - biego-balans",
+            "19. przechodzony przysiad - rozwarty/złączony",
+            "20. skip A, bieg"
+        ];
+
+        const bottocksThighs = [
+            "1. przysiad i kick boczny na jedną stronę",
+            "2. przysiad i kick boczny na drugą stronę",
+            "3. przeskoki z nogi na nogę do pozycji łyżwiarskiej",
+            "4. przysiad i po jednej nodze do klęku i powrót do przysiadu",
+            "5. krotkie przeskoki na boki na jednej nodze",
+            "6. noga doo boku, wyskok, noga 45 st., wyskok, noga do tyłu, wyskok na jednej nodze",
+            "7. krotkie przeskoki na boki na drugiej nodze",
+            "8. noga do boku, wyskok, noga 45 st., wyskok, noga do tyłu, wyskok na drugiej nodze",
+            "9. klęk podparty, wyrzut nogi w górę na jedną stronę",
+            "10. klęk podparty, wyrzut nogi w górę na drugą stronę"
+        ];
+
+        const FlatBelly = [
+            "1. ajace, ściągnięcie dłoni do stopy na krzyż x2",
+            "2. dłonie przy uszach, ściągnięcie kolana do łokcia tej samej strony",
+            "3. skręty tułowia i podskoki na jednej nodze podnosząc kolano",
+            "4. skręty tułowia i podskoki na drugiej nodze podnosząc kolano",
+            "5. pełny brzuszek na macie, potem biodra w górę",
+            "6. plank z malowaniem tęczy wyprostowaną nogą",
+            "7. leżenie na plecach, jedna noga wyprost w górze, uniesienie bioder i brzuszek do nogi",
+            "8. leżenie na plecach, druga noga wyprost w górze, uniesienie bioder i brzuszek do nogi",
+            "9. leżenie na plecach, nogi zgięte w kolanach w górze, krótki brzuszek do kolan, krótki brzuszek do prostych nóg",
+            "10. trzymanie pozycji supermana",
+            "11. pajace z obrotem o 90 st.",
+            "12. twist skacząc - rotacja bioder",
+            "13. kolano do łokcia na jedną stronę skacząc",
+            "14. kolano do łokcia na drugą stronę skacząc",
+            "15. leżenie na plecach, pełny brzuszek raz do ugiętych, raz do wyprostowanych nóg",
+            "16. plank boczny - wypad kolana do przodu na jedną stronę",
+            "17. plank boczny - wypad kolana do przodu na drugą stronę",
+            "18. rowerek na plecach z łokciem do kolana",
+            "19. leżenie na plecach, nogi wyprost w górę, unoszenie bioder ze skrętem",
+            "20. pozycja superman z pływaniem rękami żabką"
+        ];
+
+        const noMoreBellyFat = [
+            "1. pajace - 60 sekund",
+            "2. pajace - 60 sekund",
+            "3. 2 przysiady, 2 przysiady ze ściągnięciem kolana do łokcia na krzyż w podskokach",
+            "4. nożyce na plecach",
+            "5. przeskoki przód/tył",
+            "6. podskok, plank, pompka, wymach nój na 1 i 2 stronę, powrót",
+            "7. plank z przejściem z łokci na wyprostowane ręce",
+            "8. bieg - skip A - 60 sekund",
+            "9. bieg - skip A - 60 sekund",
+            "10. skoczne przysiady z rotacją 90 st.",
+            "11. leżenie na plecach, unoszenie wyprostowanych nóg góra/dół",
+            "12. przeskoki wyprostowanej nogi do ręki na krzyż",
+            "13. podskok - wysoko nogi, plank, wyrzut nóg, powrót",
+            "14. plank na prostych rękach, unosy ramion na przemian do przodu",
+            "15. bieg z ręką do stopy na krzyż - 60 sekund",
+            "16. bieg z ręką do stopy na krzyż - 60 sekund",
+            "17. plank z prostymi rękami - ściągnięcie kolana do łokcia na przemian i krzyż",
+            "18. skręty tułowia w siadzie na biodrach"
+
+
+        ];
+
+        const shouldersChestBack = [
+            "1. przysiad i na krzyż prosta noga do ręki",
+            "2. podskok, plank, 1 pompka, 4 przejścia, powrót",
+            "3. wypady nóg skacząc z mocnym skrętem",
+            "4. pompka na prostych rękach, potem wznosy ramion w przód",
+            "5. pozycja przysiad, dłonie do uszu, skręt prostując na przemian ręce",
+            "6. plank z łokci na proste ręce przeplatany",
+            "7. pozycja przysiad, plank i pompka, powrót",
+            "8.  plank i pajace w podporze",
+            "9. pełne brzuszki do uniesionych prostych nóg",
+            "10. pozycja supermana z pulsem"
+        ];
+
+
+        let workoutPlan = [
+                { list: warmUp, time: 10 },
+                { list: slimLegs, time: 30 },
+                { list: bottocksThighs, time: 30 },
+                { list: FlatBelly, time: 30 },
+                { list: noMoreBellyFat, time: 30 },
+                { list: shouldersChestBack, time: 30 }
+            ];
+        
+        let sectionIndex = 0;
+        let exerciseIndex = 0;
+        let time = workoutPlan[0].time;
+        let interval = null;
+        let isRunning = false;
+
+        
+
+        function updateUI() {
+            let section = workoutPlan[sectionIndex];
+
+            if (!section) {
+                document.getElementById("exercise").innerText = "Koniec!";
+                document.getElementById("timer").innerText = "🎉";
+                return;
+            }
+
+            document.getElementById("exercise").innerText =
+                section.list[exerciseIndex];
+
+            document.getElementById("timer").innerText = time;
+        }
+
+        function startWorkout() {
+            if (isRunning) return;
+
+            isRunning = true;
+
+            if (!interval) {
+                time = workoutPlan[sectionIndex].time;
+            }
+
+            interval = setInterval(() => {
+                time--;
+
+                if (time <= 0) {
+                    exerciseIndex++;
+
+                    let section = workoutPlan[sectionIndex];
+
+                    if (exerciseIndex >= section.list.length) {
+                        sectionIndex++;
+                        exerciseIndex = 0;
+
+                        if (sectionIndex >= workoutPlan.length) {
+                            clearInterval(interval);
+                            isRunning = false;
+                            updateUI();
+                            return;
+                        }
+                    }
+
+                    time = workoutPlan[sectionIndex].time;
+                }
+
+                updateUI();
+            }, 1000);
+
+            updateUI();
+        }
+
+        function resetWorkout() {
+            clearInterval(interval);
+            interval = null;
+            isRunning = false;
+
+            sectionIndex = 0;
+            exerciseIndex = 0;
+            time = workoutPlan[0].time;
+
+            updateUI();
+        }
+
+        function pauseWorkout() {
+            if (!isRunning) return;
+
+            clearInterval(interval);
+            isRunning = false;
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+
+</body>
+
+</html>
